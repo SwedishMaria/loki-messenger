@@ -11,11 +11,11 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./backend-go/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/backend-go/database/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend:
     build:
-      context: ./backend-go
+      context: ./services/backend-go
     restart: always
     ports:
       - '8080:8080'
@@ -24,3 +24,11 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/loki-messenger
       - JWT_SECRET=your-secret-key
+
+  frontend:
+    build:
+      context: ./services/frontend-svelte
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
