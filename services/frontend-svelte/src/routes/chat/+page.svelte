@@ -1,55 +1,83 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import ScrambledText from '../../components/ScrambledText.svelte';
-    import * as libsignal from '@privacyresearch/libsignal-protocol-typescript';
-    import { initSignal } from '../../lib/signal';
+	// @ts-nocheck
+	/**
+	 * @component ChatPage
+	 * @description The main chat interface for sending and receiving encrypted messages.
+	 */
+	import { onMount } from 'svelte';
+	import ScrambledText from '../../components/ScrambledText.svelte';
+	import * as libsignal from '@privacyresearch/libsignal-protocol-typescript';
+	import { initSignal } from '../../lib/signal';
 
-    let socket: WebSocket;
-    let messages: string[] = [];
-    let message = '';
-    let aliceCipher: libsignal.SessionCipher;
-    let bobCipher: libsignal.SessionCipher;
+	let socket: WebSocket;
+	let messages: string[] = [];
+	let message = '';
+	let aliceCipher: libsignal.SessionCipher;
+	let bobCipher: libsignal.SessionCipher;
 
-    function arrayBufferToString(buffer: ArrayBuffer) {
-        return String.fromCharCode.apply(null, new Uint8Array(buffer) as any);
-    }
+	/**
+	 * @function arrayBufferToString
+	 * @description Converts an ArrayBuffer to a string.
+	 * @param buffer The ArrayBuffer to convert.
+	 * @returns The converted string.
+	 */
+	function arrayBufferToString(buffer: ArrayBuffer) {
+		return String.fromCharCode.apply(null, new Uint8Array(buffer) as any);
+	}
 
-    function stringToArrayBuffer(str: string) {
-        const buf = new ArrayBuffer(str.length);
-        const bufView = new Uint8Array(buf);
-        for (let i = 0, strLen = str.length; i < strLen; i++) {
-            bufView[i] = str.charCodeAt(i);
-        }
-        return buf;
-    }
+	/**
+	 * @function stringToArrayBuffer
+	 * @description Converts a string to an ArrayBuffer.
+	 * @param str The string to convert.
+	 * @returns The converted ArrayBuffer.
+	 */
+	function stringToArrayBuffer(str: string) {
+		const buf = new ArrayBuffer(str.length);
+		const bufView = new Uint8Array(buf);
+		for (let i = 0, strLen = str.length; i < strLen; i++) {
+			bufView[i] = str.charCodeAt(i);
+		}
+		return buf;
+	}
 
-    onMount(async () => {
-        const { aliceStore, bobStore } = await initSignal();
-        aliceCipher = new libsignal.SessionCipher(aliceStore, new libsignal.SignalProtocolAddress('bob', 1));
-        bobCipher = new libsignal.SessionCipher(bobStore, new libsignal.SignalProtocolAddress('alice', 1));
+	onMount(async () => {
+		// Initialize the Signal protocol stores and ciphers for Alice and Bob.
+		const { aliceStore, bobStore } = await initSignal();
+		aliceCipher = new libsignal.SessionCipher(aliceStore, new libsignal.SignalProtocolAddress('bob', 1));
+		bobCipher = new libsignal.SessionCipher(bobStore, new libsignal.SignalProtocolAddress('alice', 1));
 
-        const token = localStorage.getItem('token');
-        socket = new WebSocket(`ws://localhost:8080/api/ws?token=${token}`);
+		// Establish a WebSocket connection.
+		const token = localStorage.getItem('token');
+		socket = new WebSocket(`ws://localhost:8080/api/ws?token=${token}`);
 
-        socket.onmessage = async (event) => {
-            const encrypted = JSON.parse(event.data);
-            let decrypted: ArrayBuffer;
-            if (encrypted.type === 3) {
-                decrypted = await bobCipher.decrypt(libsignal.PreKeyWhisperMessage.deserialize(stringToArrayBuffer(encrypted.body)));
-            } else {
-                decrypted = await bobCipher.decrypt(libsignal.WhisperMessage.deserialize(stringToArrayBuffer(encrypted.body)));
-            }
-            messages = [...messages, new TextDecoder().decode(decrypted)];
-        };
-    });
+		// Handle incoming messages from the WebSocket.
+		socket.onmessage = async (event) => {
+			const encrypted = JSON.parse(event.data);
+			let decrypted: ArrayBuffer;
 
-    async function sendMessage() {
-        if (socket && message) {
-            const encrypted = await aliceCipher.encrypt(new TextEncoder().encode(message).buffer);
-            socket.send(JSON.stringify({ type: encrypted.type, body: arrayBufferToString(encrypted.serialize()) }));
-            message = '';
-        }
-    }
+			// Decrypt the message using the appropriate Signal protocol method.
+			if (encrypted.type === 3) {
+				decrypted = await bobCipher.decrypt(libsignal.PreKeyWhisperMessage.deserialize(stringToArrayBuffer(encrypted.body)));
+			} else {
+				decrypted = await bobCipher.decrypt(libsignal.WhisperMessage.deserialize(stringToArrayBuffer(encrypted.body)));
+			}
+			messages = [...messages, new TextDecoder().decode(decrypted)];
+		};
+	});
+
+	/**
+	 * @function sendMessage
+	 * @description Encrypts and sends a message through the WebSocket.
+	 */
+	async function sendMessage() {
+		if (socket && message) {
+			// Encrypt the message using the Signal protocol.
+			const encrypted = await aliceCipher.encrypt(new TextEncoder().encode(message).buffer);
+			// Send the encrypted message to the server.
+			socket.send(JSON.stringify({ type: encrypted.type, body: arrayBufferToString(encrypted.serialize()) }));
+			message = '';
+		}
+	}
 </script>
 
 <h1>Chat</h1>
