@@ -1,7 +1,6 @@
 # Loki Messenger
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Discord](https://img.shields.io/discord/YOUR_DISCORD_SERVER_ID?logo=discord&logoColor=white)](https://discord.gg/lindqviist)
 
 Loki Messenger is a cutting-edge, secure messaging application designed for absolute privacy and anonymity. This project leverages a sophisticated architecture, routing all traffic through the Tor network and securing all communications with the Signal Protocol. This combination makes it one of the most secure and privacy-respecting messengers available.
 
@@ -33,8 +32,6 @@ The project is built with a focus on security, performance, and modern developme
 
 The project is organized as a monorepo:
 
--   `docs/`: Project documentation.
--   `scripts/`: Utility scripts.
 -   `services/`:
     -   `backend-go/`: The Go backend service.
     -   `frontend-svelte/`: The Svelte frontend service.
@@ -45,10 +42,16 @@ You'll need [Docker](https://www.docker.com/get-started) and [Docker Compose](ht
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/loki-messenger.git
+    git clone https://github.com/loki-messenger/loki-messenger.git
     cd loki-messenger
     ```
-2.  **Run with Docker Compose:**
+2.  **Set up environment variables:**
+
+    Copy the example environment file for the backend service:
+    ```bash
+    cp services/backend-go/.env.example services/backend-go/.env
+    ```
+3.  **Run with Docker Compose:**
     ```bash
     docker-compose up --build
     ```
