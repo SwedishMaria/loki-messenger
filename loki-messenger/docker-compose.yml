@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: loki_messenger_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: loki_messenger_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend-go/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - loki_messenger_network
+
+  backend:
+    build:
+      context: ./backend-go
+      dockerfile: Dockerfile
+    container_name: loki_messenger_backend
+    env_file:
+      - ./backend-go/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - loki_messenger_network
+
+volumes:
+  postgres_data:
+
+networks:
+  loki_messenger_network:
+    driver: bridge
