@@ -60,7 +60,7 @@ The application will be available at:
 
 ## Author
 
-This project was summoned into existence by **Maria**, a cute puppygirl from Sweden! ૮ ´• ﻌ ´• ა
+Summoned into existence by **Maria**, a cute puppygirl! ૮ ´• ﻌ ´• ა
 
 Got questions, suggestions, bug reports, or just wanna chat? Hit me up! I don't bite... much. You can find me here:
 
