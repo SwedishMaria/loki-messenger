@@ -24,6 +24,20 @@ func main() {
 	auth.POST("/register", handlers.Register)
 	auth.POST("/login", handlers.Login)
 
+	ws := api.Group("/ws")
+	ws.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token := c.QueryParam("token")
+			if token == "" {
+				return echo.ErrUnauthorized
+			}
+			return next(c)
+		}
+	})
+	ws.GET("", handlers.HandleConnections)
+
+	go handlers.HandleMessages()
+
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
 }
