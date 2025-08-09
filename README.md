@@ -42,7 +42,7 @@ You'll need [Docker](https://www.docker.com/get-started) and [Docker Compose](ht
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/loki-messenger/loki-messenger.git
+    git clone https://github.com/SwedishMaria/loki-messenger.git
     cd loki-messenger
     ```
 2.  **Set up environment variables:**
